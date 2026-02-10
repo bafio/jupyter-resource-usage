@@ -30,6 +30,8 @@ type Usage = {
     used: number;
     wired: number;
   };
+  bytes_sent?: number;
+  bytes_recv?: number;
 };
 
 const POLL_INTERVAL_SEC = 5;
@@ -353,6 +355,26 @@ const KernelUsage = (props: {
                   </div>
                 </>
               ) : null}
+                  {(usage.bytes_sent !== undefined || usage.bytes_recv !== undefined) ? (
+                    <>
+                      <hr className="jp-KernelUsage-section-separator"></hr>
+                      <h4 className="jp-KernelUsage-section-separator">
+                        {props.trans.__('Host Network')}
+                      </h4>
+                      {usage.bytes_sent !== undefined && (
+                        <div className="jp-KernelUsage-separator">
+                          {props.trans.__('Bytes sent:')}{' '}
+                          {formatForDisplay(usage.bytes_sent)}
+                        </div>
+                      )}
+                      {usage.bytes_recv !== undefined && (
+                        <div className="jp-KernelUsage-separator">
+                          {props.trans.__('Bytes received:')}{' '}
+                          {formatForDisplay(usage.bytes_recv)}
+                        </div>
+                      )}
+                    </>
+                  ) : null}
             </>
           ) : blankStateReason?.reason === 'loading' ? (
             <div className="jp-KernelUsage-separator">
