@@ -126,6 +126,13 @@ export namespace ResourceUsage {
     }
 
     /**
+     * The label for network display.
+     */
+    get networkLabel(): string {
+      return this._networkLabel;
+    }
+
+    /**
      * Whether the metrics server extension is available.
      */
     get metricsAvailable(): boolean {
