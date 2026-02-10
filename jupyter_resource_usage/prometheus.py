@@ -25,6 +25,8 @@ class PrometheusHandler(Callable):
             "max_cpu",
             "max_disk",
             "current_disk",
+            "bytes_sent",
+            "bytes_recv",
         ]
         for name in gauge_names:
             phrase = name + "_usage"
@@ -46,6 +48,12 @@ class PrometheusHandler(Callable):
             if disk_metric_values is not None:
                 self.CURRENT_DISK_USAGE.set(disk_metric_values["disk_usage_used"])
                 self.MAX_DISK_USAGE.set(disk_metric_values["disk_usage_total"])
+        if self.config.track_network_usage:
+            network_metric_values = self.metricsloader.network_metrics()
+            if network_metric_values is not None:
+                self.BYTES_SENT_USAGE.set(network_metric_values["net_io_counters_bytes_sent"])
+                self.BYTES_RECV_USAGE.set(network_metric_values["net_io_counters_bytes_recv"])
+
 
     def apply_memory_limit(self, memory_metric_values) -> Optional[int]:
         if memory_metric_values is None:

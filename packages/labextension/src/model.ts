@@ -384,6 +384,8 @@ namespace Private {
     cpu_count?: number;
     disk_total?: number;
     disk_used?: number;
+    bytes_sent?: number;
+    bytes_recv?: number;
     limits: {
       memory?: {
         rss: number;
@@ -396,6 +398,11 @@ namespace Private {
       };
       disk?: {
         max: number;
+        warn: boolean;
+      };
+      network?: {
+        bytes_sent: number;
+        bytes_recv: number;
         warn: boolean;
       };
     };

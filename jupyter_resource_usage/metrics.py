@@ -91,3 +91,7 @@ class PSUtilMetricsLoader:
         return self.metrics(
             self.config.process_disk_metrics, self.config.system_disk_metrics
         )
+    def network_metrics(self):
+        return self.metrics(
+            self.config.process_network_metrics, self.config.system_network_metrics
+        )

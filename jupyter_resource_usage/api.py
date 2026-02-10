@@ -89,6 +89,22 @@ class ApiHandler(APIHandler):
                         disk_info.total * config.disk_warning_threshold
                     )
 
+        # Optionally get Network information
+        if config.track_network_usage:
+            try:
+                net_info = psutil.net_io_counters()
+            except Exception:
+                pass
+            else:
+                metrics.update(
+                    bytes_sent=net_info.bytes_sent, bytes_recv=net_info.bytes_recv
+                )
+                # Network limits are not implemented yet, but keeping the structure
+                # for future enhancement
+                limits["network"] = {"bytes_sent": 0, "bytes_recv": 0}
+                if config.network_warning_threshold != 0:
+                    limits["network"]["warn"] = False
+
         self.write(json.dumps(metrics))
 
     @run_on_executor

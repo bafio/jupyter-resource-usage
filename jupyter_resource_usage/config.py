@@ -79,6 +79,19 @@ class ResourceUseDisplay(Configurable):
         ],
     )
 
+    process_network_metrics = List(
+        trait=PSUtilMetric(),
+        default_value=[],
+    )
+
+    system_network_metrics = List(
+        trait=PSUtilMetric(),
+        default_value=[
+            {"name": "net_io_counters", "attribute": "bytes_sent"},
+            {"name": "net_io_counters", "attribute": "bytes_recv"},
+        ],
+    )
+
     mem_warning_threshold = Float(
         default_value=0.1,
         help="""
@@ -165,6 +178,23 @@ class ResourceUseDisplay(Configurable):
 
         For example, if total size is 10G, `disk_warning_threshold` is 0.1,
         we will start warning the user when they use (10 - (10 * 0.1)) G.
+
+        Set to 0 to disable warning.
+        """,
+    ).tag(config=True)
+
+    track_network_usage = Bool(
+        default_value=False,
+        help="""
+        Set to True in order to enable reporting of network usage statistics.
+        """,
+    ).tag(config=True)
+
+    network_warning_threshold = Float(
+        default_value=0.1,
+        help="""
+        Warn user with flashing lights when network usage is within this fraction
+        of the network limit.
 
         Set to 0 to disable warning.
         """,
