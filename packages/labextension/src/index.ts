@@ -38,10 +38,12 @@ import { CpuView } from './cpuView';
 import { DiskView } from './diskView';
 
 import { MemoryView } from './memoryView';
+import { NetworkView } from './networkView';
 
 import { DEFAULT_CPU_LABEL } from './cpuView';
 import { DEFAULT_DISK_LABEL } from './diskView';
 import { DEFAULT_MEMORY_LABEL } from './memoryView';
+import { DEFAULT_NETWORK_LABEL } from './networkView';
 
 /**
  * Disable system monitor panels by default.
@@ -122,6 +124,7 @@ const systemMonitorPlugin: JupyterFrontEndPlugin<void> = {
     let cpuLabel = DEFAULT_CPU_LABEL;
     let memoryLabel = DEFAULT_MEMORY_LABEL;
     let diskLabel = DEFAULT_DISK_LABEL;
+    let networkLabel = DEFAULT_NETWORK_LABEL;
 
     if (settingRegistry) {
       const settings = await settingRegistry.load(systemMonitorPlugin.id);
@@ -137,6 +140,8 @@ const systemMonitorPlugin: JupyterFrontEndPlugin<void> = {
 
       const diskSettings = settings.get('disk').composite as IResourceSettings;
       diskLabel = diskSettings.label;
+      const networkSettings = settings.get('network').composite as IResourceSettings;
+      networkLabel = networkSettings.label;
     }
 
     const model = new ResourceUsage.Model({
@@ -167,6 +172,12 @@ const systemMonitorPlugin: JupyterFrontEndPlugin<void> = {
       toolbarRegistry.addFactory('TopBar', 'disk', () => {
         const disk = DiskView.createDiskView(model, diskLabel);
         return disk;
+      });
+    }
+    if (enablePlugin && model.networkAvailable) {
+      toolbarRegistry.addFactory('TopBar', 'network', () => {
+        const network = NetworkView.createNetworkView(model, networkLabel);
+        return network;
       });
     }
   },

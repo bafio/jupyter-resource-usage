@@ -159,6 +159,17 @@ Mirroring CPU and Memory, the trait `disk_warning_threshold` signifies when to f
 
 ![Screenshot with Disk, CPU, and memory](./doc/statusbar_disk.png)
 
+### Network usage
+
+`jupyter-resource-usage` can also report basic network I/O counters (total bytes sent and received) from the host via `psutil.net_io_counters`. Network tracking is disabled by default and can be enabled via the `track_network_usage` trait:
+
+```python
+c = get_config()
+c.ResourceUseDisplay.track_network_usage = True
+```
+
+When enabled the `/api/metrics/v1` response will include `bytes_sent` and `bytes_recv` fields (total bytes since host boot), and the alternative frontend provides a `Net:` topbar indicator showing sent / recv totals. Prometheus metrics are exposed when Prometheus reporting is enabled.
+
 ### Disable Prometheus Metrics
 
 There is a [known bug](https://github.com/jupyter-server/jupyter-resource-usage/issues/123) with Prometheus metrics which

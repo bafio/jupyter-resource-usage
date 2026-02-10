@@ -14,6 +14,7 @@ import { MemoryUnit, MEMORY_UNIT_LIMITS, convertToLargestUnit } from './format';
 import { DEFAULT_CPU_LABEL } from './cpuView';
 import { DEFAULT_DISK_LABEL } from './diskView';
 import { DEFAULT_MEMORY_LABEL } from './memoryView';
+import { DEFAULT_NETWORK_LABEL } from './networkView';
 
 /**
  * Number of values to keep in memory.
@@ -32,19 +33,21 @@ export namespace ResourceUsage {
     /**
      * A model for holding resource usage warnings.
      */
-    constructor(memory = false, cpu = false, disk = false) {
+    constructor(memory = false, cpu = false, disk = false, network = false) {
       this._memory = memory;
       this._cpu = cpu;
       this._disk = disk;
+      this._network = network;
     }
 
     get hasWarning(): boolean {
-      return this._memory || this._cpu || this._disk;
+      return this._memory || this._cpu || this._disk || this._network;
     }
 
     private _memory = false;
     private _cpu = false;
     private _disk = false;
+    private _network = false;
   }
 
   export class Model extends VDomModel {
@@ -56,7 +59,12 @@ export namespace ResourceUsage {
     constructor(options: Model.IOptions) {
       super();
       for (let i = 0; i < N_BUFFER; i++) {
-        this._values.push({ memoryPercent: 0, cpuPercent: 0, diskPercent: 0 });
+        this._values.push({
+          memoryPercent: 0,
+          cpuPercent: 0,
+          diskPercent: 0,
+          networkPercent: 0,
+        });
       }
       this._poll = new Poll<Private.IMetricRequestResult | null>({
         factory: (): Promise<Private.IMetricRequestResult | null> =>
@@ -146,6 +154,13 @@ export namespace ResourceUsage {
     }
 
     /**
+     * Whether the network metric is available.
+     */
+    get networkAvailable(): boolean {
+      return this._networkAvailable;
+    }
+
+    /**
      * The current memory usage.
      */
     get currentMemory(): number {
@@ -202,6 +217,20 @@ export namespace ResourceUsage {
     }
 
     /**
+     * The current total bytes sent.
+     */
+    get bytesSent(): number {
+      return this._bytesSent;
+    }
+
+    /**
+     * The current total bytes received.
+     */
+    get bytesRecv(): number {
+      return this._bytesRecv;
+    }
+
+    /**
      * Get a list of the last metric values.
      */
     get values(): Model.IMetricValue[] {
@@ -250,7 +279,8 @@ export namespace ResourceUsage {
       const usageWarnings = new ResourceUsageWarning(
         value.limits.memory?.warn,
         value.limits.cpu?.warn,
-        value.limits.disk?.warn
+        value.limits.disk?.warn,
+        value.limits.network?.warn
       );
 
       this._memoryAvailable = numBytes !== undefined;
@@ -288,10 +318,17 @@ export namespace ResourceUsage {
 
       const currentDiskPercent = Math.min(this._currentDisk / this._maxDisk, 1);
 
+      // Network metrics
+      this._networkAvailable =
+        value.bytes_sent !== undefined || value.bytes_recv !== undefined;
+      this._bytesSent = value.bytes_sent ?? 0;
+      this._bytesRecv = value.bytes_recv ?? 0;
+
       this._values.push({
         memoryPercent,
         cpuPercent: this._currentCpuPercent,
         diskPercent: currentDiskPercent,
+        networkPercent: 0,
       });
       this._values.shift();
       this.stateChanged.emit(void 0);
@@ -300,9 +337,11 @@ export namespace ResourceUsage {
     private _cpuLabel = DEFAULT_CPU_LABEL;
     private _memLabel = DEFAULT_MEMORY_LABEL;
     private _diskLabel = DEFAULT_DISK_LABEL;
+    private _networkLabel = DEFAULT_NETWORK_LABEL;
     private _memoryAvailable = false;
     private _cpuAvailable = false;
     private _diskAvailable = false;
+    private _networkAvailable = false;
     private _currentMemory = 0;
     private _currentDisk = 0;
     private _maxDisk = 0;
@@ -314,6 +353,8 @@ export namespace ResourceUsage {
     private _diskUnits: MemoryUnit = 'B';
     private _warn = new ResourceUsageWarning();
     private _values: Model.IMetricValue[] = [];
+    private _bytesSent = 0;
+    private _bytesRecv = 0;
   }
 
   /**
@@ -353,6 +394,11 @@ export namespace ResourceUsage {
        * The cpu percentage.
        */
       diskPercent: number;
+
+      /**
+       * The network metric placeholder (no percentage currently defined).
+       */
+      networkPercent: number;
     }
   }
 }

@@ -10,6 +10,7 @@ import { TranslationBundle } from '@jupyterlab/translation';
 import React from 'react';
 
 import { ResourceUsage } from './model';
+import { formatForDisplay } from './format';
 
 import { resourceItem } from './text';
 
@@ -60,6 +61,11 @@ export class ResourceUsageStatus extends VDomRenderer<ResourceUsage.Model> {
       )} / ${this.model.maxDisk.toFixed(Private.DECIMAL_PLACES)} ${
         this.model.diskUnits
       } | ${text}`;
+    }
+    if (this.model.networkAvailable) {
+      text = `${this.model.networkLabel} ${formatForDisplay(
+        this.model.bytesSent
+      )} / ${formatForDisplay(this.model.bytesRecv)} | ${text}`;
     }
     if (!this.model.usageWarnings.hasWarning) {
       return (
