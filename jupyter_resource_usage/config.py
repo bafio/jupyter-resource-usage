@@ -184,7 +184,7 @@ class ResourceUseDisplay(Configurable):
     ).tag(config=True)
 
     track_network_usage = Bool(
-        default_value=False,
+        default_value=True,
         help="""
         Set to True in order to enable reporting of network usage statistics.
         """,
